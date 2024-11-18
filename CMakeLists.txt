@@ -11,5 +11,9 @@ project(Putting CXX)
 
 include(CTest)
 
-add_executable (putting putting.cpp)
-target_link_libraries(putting gmpxx gmp)
+add_library(stats stats.cpp)
+target_link_libraries(stats gmpxx gmp)
+add_executable (1tail 1tail.cpp)
+add_executable (2tail 2tail.cpp)
+target_link_libraries(1tail stats)
+target_link_libraries(2tail stats)
