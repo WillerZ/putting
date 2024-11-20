@@ -1,0 +1,9 @@
+Mallet 120 30 KS1 116 34
+Mallet 120 30 Mallet 120 30
+Mallet 120 30 HalfMallet 109 41
+Mallet_start 24 6 Mallet_end 26 4
+Mallet 79 21 Driver 69 31
+Mallet 47 13 Augusta 37 23
+Mallet 32 8 Putterwood 26 14
+Mallet 32 8 Anser 26 14
+Mallet 32 8 Method001 23 17
