@@ -7,3 +7,5 @@ Mallet 4 43 13 Augusta 3 34 23
 Mallet 3 29 8 Putterwood 2 24 14
 Mallet 3 29 8 Anser 2 24 14
 Mallet 3 29 8 Method001 2 21 17
+Fake1 40 300 60 Fake2 20 150 30
+Fake3 133 133 134 Fake4 66 66 68

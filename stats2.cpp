@@ -15,8 +15,7 @@ mpq_class FishersExact2Test(Sample2 const one, Sample2 const other) {
 }
 
 // tail case missed -> made
-static mpq_class FishersExact2Test1TailIntegrationX(Sample2 const l,
-                                                    Sample2 const r) {
+static mpq_class FishersExact2Test1TailIntegrationX(Sample2 const l, Sample2 const r) {
   Sample2 left = l;
   Sample2 right = r;
   mpq_class result;
@@ -36,8 +35,7 @@ static mpq_class FishersExact2Test1TailIntegrationX(Sample2 const l,
 }
 
 // tail case missed -> made -> exact
-static mpq_class FishersExact2Test1TailIntegrationY(Sample2 const l,
-                                                    Sample2 const r) {
+static mpq_class FishersExact2Test1TailIntegrationY(Sample2 const l, Sample2 const r) {
   Sample2 left = l;
   Sample2 right = r;
   // Every better made count with this exact count
@@ -71,19 +69,15 @@ static mpq_class FishersExact2Test1TailIntegrationY(Sample2 const l,
 }
 
 // Fisher's exact test for 3 categories, 1-tail integration
-mpq_class FishersExact2Test1TailIntegration(Sample2 const base,
-                                            Sample2 const comparand) {
+mpq_class FishersExact2Test1TailIntegration(Sample2 const base, Sample2 const comparand) {
   mpq_class result = FishersExact2Test(base, comparand);
-  if (((1.0 * comparand.exact) / comparand.total() >
-       (1.0 * base.exact) / base.total()) ||
-      (((1.0 * comparand.exact) / comparand.total() ==
-        (1.0 * base.exact) / base.total()) &&
-       ((1.0 * comparand.made) / comparand.total() >=
-        (1.0 * base.made) / base.total()))) {
+  if (((1.0 * comparand.exact) / comparand.total() > (1.0 * base.exact) / base.total()) ||
+      (((1.0 * comparand.exact) / comparand.total() == (1.0 * base.exact) / base.total()) &&
+       ((1.0 * comparand.made) / comparand.total() >= (1.0 * base.made) / base.total()))) {
     result += FishersExact2Test1TailIntegrationY(base, comparand);
   } else {
     result += FishersExact2Test1TailIntegrationY(comparand, base);
   }
   return result;
 }
-}  // namespace phil::stats
+} // namespace phil::stats
