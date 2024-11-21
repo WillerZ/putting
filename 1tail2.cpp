@@ -7,6 +7,7 @@
 using namespace phil::stats;
 
 int main(void) {
+  mpf_set_default_prec(128);
   std::chrono::steady_clock::time_point pre, post;
   pre = std::chrono::steady_clock::now();
   while (!std::cin.eof()) {
@@ -20,10 +21,10 @@ int main(void) {
         (((1.0 * sample1.exact) / sample1.total() == (1.0 * sample2.exact) / sample2.total()) &&
          ((1.0 * sample1.made) / sample1.total() > (1.0 * sample2.made) / sample2.total()))) {
       std::cout << name1 << " is better than " << name2 << " at " << std::fixed << std::setprecision(1)
-                << 100.0 - (mpf_class{FishersExact2Test1TailIntegration(sample1, sample2)} * 100.0) << "% confidence ";
+                << 100.0 - (FishersExact2Test1TailIntegration(sample1, sample2) * 100.0) << "% confidence ";
     } else {
       std::cout << name2 << " is better than " << name1 << " at " << std::fixed << std::setprecision(1)
-                << 100.0 - (mpf_class{FishersExact2Test1TailIntegration(sample1, sample2)} * 100.0) << "% confidence ";
+                << 100.0 - (FishersExact2Test1TailIntegration(sample1, sample2) * 100.0) << "% confidence ";
     }
     post = std::chrono::steady_clock::now();
     std::cout << "in " << std::chrono::duration_cast<std::chrono::microseconds>(post - pre) << "\n";

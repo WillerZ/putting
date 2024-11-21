@@ -14,6 +14,5 @@ struct Sample2 {
   }
 };
 
-mpq_class FishersExact2Test(Sample2 one, Sample2 other);
-mpq_class FishersExact2Test1TailIntegration(Sample2 const base, Sample2 const comparand);
+mpf_class FishersExact2Test1TailIntegration(Sample2 const base, Sample2 const comparand);
 } // namespace phil::stats

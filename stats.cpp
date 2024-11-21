@@ -1,22 +1,23 @@
 #include "stats.hpp"
+#include "cache.hpp"
 
 #include <gmpxx.h>
 
 #include <cassert>
 
 namespace phil::stats {
-mpq_class FishersExactTest(unsigned long a, unsigned long b, unsigned long c, unsigned long d) {
-  mpz_class x, y, z;
-  mpz_bin_uiui(x.get_mpz_t(), a + c, a);
-  mpz_bin_uiui(y.get_mpz_t(), b + d, b);
-  mpz_bin_uiui(z.get_mpz_t(), a + b + c + d, a + b);
-  return mpq_class{x * y} / z;
+static mpf_class FishersExactTest(IntermediateCache &cache, unsigned long a, unsigned long b, unsigned long c,
+                                  unsigned long d) {
+  auto &&x = cache.getBinomialCoefficient(a + c, a);
+  auto &&y = cache.getBinomialCoefficient(b + d, b);
+  auto &&z = cache.getReciprocal(cache.getBinomialCoefficient(a + b + c + d, a + b));
+  return x * y * z;
 }
 
-static mpq_class FishersExactTest1TailIntegrationX(Sample const l, Sample const r) {
+static mpf_class FishersExactTest1TailIntegrationX(IntermediateCache &cache, Sample const l, Sample const r) {
   Sample left = l;
   Sample right = r;
-  mpq_class result = FishersExactTest(left.made, left.missed, right.made, right.missed);
+  auto result = FishersExactTest(cache, left.made, left.missed, right.made, right.missed);
   while (left.made && right.missed) {
     --left.made;
     ++left.missed;
@@ -26,24 +27,26 @@ static mpq_class FishersExactTest1TailIntegrationX(Sample const l, Sample const 
     assert(r.total() == right.total());
     assert(l.made + r.made == left.made + right.made);
     assert(l.missed + r.missed == left.missed + right.missed);
-    result += FishersExactTest(left.made, left.missed, right.made, right.missed);
+    result += FishersExactTest(cache, left.made, left.missed, right.made, right.missed);
   }
   return result;
 }
 
 // Fisher's exact test, 1-tail integration
-mpq_class FishersExactTest1TailIntegration(Sample const base, Sample const comparand) {
+mpf_class FishersExactTest1TailIntegration(Sample const base, Sample const comparand) {
+  IntermediateCache cache;
   if ((1.0 * comparand.made) / comparand.total() >= (1.0 * base.made) / base.total()) {
-    return FishersExactTest1TailIntegrationX(base, comparand);
+    return FishersExactTest1TailIntegrationX(cache, base, comparand);
   } else {
-    return FishersExactTest1TailIntegrationX(comparand, base);
+    return FishersExactTest1TailIntegrationX(cache, comparand, base);
   }
 }
 
-static mpq_class FishersExactTest2TailIntegrationX(Sample const l, Sample const r, mpq_class const &level) {
+static mpf_class FishersExactTest2TailIntegrationX(IntermediateCache &cache, Sample const l, Sample const r,
+                                                   mpf_class const &level) {
   Sample left = l;
   Sample right = r;
-  mpq_class result;
+  mpf_class result;
   while (left.made && right.missed) {
     --left.made;
     ++left.missed;
@@ -53,7 +56,7 @@ static mpq_class FishersExactTest2TailIntegrationX(Sample const l, Sample const 
     assert(r.total() == right.total());
     assert(l.made + r.made == left.made + right.made);
     assert(l.missed + r.missed == left.missed + right.missed);
-    auto x = FishersExactTest(left.made, left.missed, right.made, right.missed);
+    auto x = FishersExactTest(cache, left.made, left.missed, right.made, right.missed);
     if (x < level) {
       result += x;
     }
@@ -62,11 +65,11 @@ static mpq_class FishersExactTest2TailIntegrationX(Sample const l, Sample const 
 }
 
 // Fisher's exact test, 2-tail integration
-mpq_class FishersExactTest2TailIntegration(Sample const base, Sample const comparand) {
-  mpq_class result = FishersExactTest(base.made, base.missed, comparand.made, comparand.missed);
-  auto const tail1 = FishersExactTest2TailIntegrationX(base, comparand, result);
-  auto const tail2 = FishersExactTest2TailIntegrationX(comparand, base, result);
-  return result + tail1 + tail2;
+mpf_class FishersExactTest2TailIntegration(Sample const base, Sample const comparand) {
+  IntermediateCache cache;
+  auto const result = FishersExactTest(cache, base.made, base.missed, comparand.made, comparand.missed);
+  return result + FishersExactTest2TailIntegrationX(cache, base, comparand, result) +
+         FishersExactTest2TailIntegrationX(cache, comparand, base, result);
 }
 
 } // namespace phil::stats
