@@ -1,10 +1,13 @@
+#pragma once
+
 #include <gmpxx.h>
 #include <map>
 
 namespace phil::stats {
 
 struct IntermediateCache {
-  mpz_class const &getBinomialCoefficient(unsigned long const from, unsigned long const select) {
+  mpz_class const &getBinomialCoefficient(unsigned long const from, unsigned long const s) {
+    auto const select = std::max(s, from - s);
     auto [fromIter, createdFrom] = binomialCoefficientCache_.try_emplace(from);
     auto [selectIter, createdSelect] = fromIter->second.try_emplace(select);
     if (createdSelect) {
