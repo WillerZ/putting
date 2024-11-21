@@ -6,52 +6,43 @@
 #include <cassert>
 
 namespace phil::stats {
-static mpf_class FishersExactTest(IntermediateCache &cache, unsigned long a, unsigned long b, unsigned long c,
-                                  unsigned long d) {
-  auto &&x = cache.getBinomialCoefficient(a + c, a);
-  auto &&y = cache.getBinomialCoefficient(b + d, b);
-  auto &&z = cache.getReciprocal(cache.getBinomialCoefficient(a + b + c + d, a + b));
+// Willoughby's Exact Test
+static mpf_class WilloughbysExactTest(IntermediateCache &cache, Sample const base, Sample const comparand) {
+  auto &&x = cache.getBinomialCoefficient(base.made, comparand.made);
+  auto &&y = cache.getBinomialCoefficient(base.missed, comparand.missed);
+  auto &&z = cache.getReciprocal(cache.getBinomialCoefficient(base.total(), comparand.total()));
   return x * y * z;
 }
 
-static mpf_class FishersExactTest1TailIntegrationX(IntermediateCache &cache, Sample const l, Sample const r) {
-  Sample left = l;
+// Willoughby's Exact Test, Cumulative part only
+static mpf_class WilloughbysExactTestCumulativeOnly(IntermediateCache &cache, Sample const left, Sample const r) {
   Sample right = r;
-  mpf_class result;
-  while (left.made && right.missed) {
-    --left.made;
-    ++left.missed;
-    ++right.made;
-    --right.missed;
-    assert(l.total() == left.total());
-    assert(r.total() == right.total());
-    assert(l.made + r.made == left.made + right.made);
-    assert(l.missed + r.missed == left.missed + right.missed);
-    result += FishersExactTest(cache, left.made, left.missed, right.made, right.missed);
-  }
-  return result;
-}
-
-// Fisher's exact test, 1-tail integration
-mpf_class FishersExactTest1TailIntegration(Sample const base, Sample const comparand) {
-  IntermediateCache cache;
-  auto const result = FishersExactTest(cache, base.made, base.missed, comparand.made, comparand.missed);
-  if ((1.0 * comparand.made) / comparand.total() >= (1.0 * base.made) / base.total()) {
-    return result + FishersExactTest1TailIntegrationX(cache, base, comparand);
+  if (right.made > right.missed) {
+    mpf_class result;
+    while (right.made) {
+      --right.made;
+      ++right.missed;
+      assert(r.total() == right.total());
+      result += WilloughbysExactTest(cache, left, right);
+    }
+    return result;
   } else {
-    return result + FishersExactTest1TailIntegrationX(cache, comparand, base);
+    mpf_class result;
+    while (right.missed) {
+      ++right.made;
+      --right.missed;
+      assert(r.total() == right.total());
+      result += WilloughbysExactTest(cache, left, right);
+    }
+    return 1 - result;
   }
 }
 
-// Fisher's exact test, 2-tail integration
-mpf_class FishersExactTest2TailIntegration(Sample const base, Sample const comparand) {
+// Willoughby's Exact Test, Cumulative
+std::pair<mpf_class, mpf_class> WilloughbysExactTestCumulative(Sample const base, Sample const comparand) {
   IntermediateCache cache;
-  auto const result = FishersExactTest(cache, base.made, base.missed, comparand.made, comparand.missed);
-  if ((1.0 * comparand.made) / comparand.total() >= (1.0 * base.made) / base.total()) {
-    return result + 2 * FishersExactTest1TailIntegrationX(cache, base, comparand);
-  } else {
-    return result + 2 * FishersExactTest1TailIntegrationX(cache, comparand, base);
-  }
+  auto const result = WilloughbysExactTest(cache, base, comparand);
+  return std::make_pair(std::move(result), WilloughbysExactTestCumulativeOnly(cache, base, comparand));
 }
 
 } // namespace phil::stats

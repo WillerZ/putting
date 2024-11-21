@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <gmpxx.h>
 
 namespace phil::stats {
@@ -11,6 +12,6 @@ struct Sample {
   constexpr Sample operator-(Sample other) const noexcept { return Sample{made - other.made, missed - other.missed}; }
 };
 
-mpf_class FishersExactTest1TailIntegration(Sample const base, Sample const comparand);
-mpf_class FishersExactTest2TailIntegration(Sample const base, Sample const comparand);
+// Willoughby's Exact Test, Cumulative. Result is {exact part, cumulative part}
+std::pair<mpf_class, mpf_class> WilloughbysExactTestCumulative(Sample const base, Sample const comparand);
 } // namespace phil::stats

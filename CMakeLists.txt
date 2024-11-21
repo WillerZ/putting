@@ -11,11 +11,7 @@ project(Putting CXX)
 
 include(CTest)
 
-add_library(stats stats.cpp stats2.cpp)
+add_library(stats stats.cpp)
 target_link_libraries(stats -static gmpxx gmp)
 add_executable (1tail 1tail.cpp)
-add_executable (2tail 2tail.cpp)
-add_executable (1tail2 1tail2.cpp)
 target_link_libraries(1tail -static stats)
-target_link_libraries(2tail -static stats)
-target_link_libraries(1tail2 -static stats)
